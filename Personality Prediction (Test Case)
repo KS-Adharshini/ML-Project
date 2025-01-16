@@ -1,0 +1,22 @@
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.feature_extraction.text import CountVectorizer
+
+data = pd.read_excel("ML_database.xlsx")
+
+vectorizer = CountVectorizer(max_features=50)
+X = vectorizer.fit_transform(data['Skills']).toarray()
+
+label_encoder = LabelEncoder()
+y = label_encoder.fit_transform(data['MBTI'])
+
+model = DecisionTreeClassifier(random_state=42)
+model.fit(X, y)
+
+user_skills = input("Enter skills: ")
+user_skills_vectorized = vectorizer.transform([user_skills]).toarray()
+predicted_mbti = model.predict(user_skills_vectorized)
+predicted_mbti_label = label_encoder.inverse_transform(predicted_mbti)[0]
+
+print(f"Predicted MBTI type: {predicted_mbti_label}")
