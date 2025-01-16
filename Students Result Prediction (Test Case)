@@ -1,0 +1,59 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+data = pd.read_excel("ML_dataset.xlsx")
+
+grade_10_input = int(input("Enter the Grade 10 %(ex 40): "))
+attend_input = int(input("Enter the Attend % (ex 60): "))
+mcs_input = int(input("Enter the MCS score (ex 5): "))
+study_hours_input = int(input("Enter the Study Hours (ex 5): "))
+failed_tests_input = int(input("Enter the number Test failed (ex 2): "))
+
+def classify(row):
+    if grade_10_input < 40:
+        return 'Negative'
+    elif attend_input < 60:
+        return 'Negative'
+    elif mcs_input < 5:
+        return 'Negative'
+    elif study_hours_input < 5:
+        return 'Negative'
+    elif failed_tests_input > 1:
+        return 'Negative'
+    else:
+        return 'Positive'
+
+data['Predicted_Result'] = data.apply(classify, axis=1)
+
+features = ['Grade 10', 'Attend %', 'MCS', 'Study Hours', 'Test 1', 'Test 2', 'Test 3']
+X = data[features]
+y = data['Predicted_Result']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = DecisionTreeClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+predictions = pd.DataFrame({
+    'Actual': y_test,
+    'Predicted': y_pred
+})
+
+summary_output = ', '.join([f"Actual: {row['Actual']}, Predicted: {row['Predicted']}" for index, row in predictions.iterrows()])
+
+final_prediction = y_pred.tolist()
+positive_count = final_prediction.count('Positive')
+negative_count = final_prediction.count('Negative')
+
+if positive_count > negative_count:
+    final_classification = "Overall Prediction: Positive"
+else:
+    final_classification = "Overall Prediction: Negative"
+
+print("\nPredictions for the test set:")
+print(summary_output)
+print(final_classification)
